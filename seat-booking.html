@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Seats – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/seat-grid.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a id="back-to-showtimes-link" href="index.html" class="nav-link">← Change Show</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <div class="booking-layout-wrapper">
+      
+      <!-- 2D Interactive Cinema Hall Matrix -->
+      <section class="cinema-hall-container">
+        <!-- Curved Screen Visual -->
+        <div class="screen-visual-wrap">
+          <div class="screen-curve"></div>
+          <span class="screen-text">All Eyes This Way • Cinema Screen</span>
+        </div>
+
+        <!-- 2D Seat Matrix Grid -->
+        <div class="seat-matrix" id="seat-matrix-container">
+          <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+            Loading auditorium seating layout...
+          </div>
+        </div>
+
+        <!-- Legend Swatches -->
+        <div class="seat-legend">
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: #23283b; border: 1px solid rgba(255,255,255,0.12);"></div>
+            <span>Standard</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple);"></div>
+            <span>Premium</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: rgba(245, 158, 11, 0.2); border: 1px solid var(--primary);"></div>
+            <span>VIP Recliner</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: var(--primary); border: 1px solid #fff;"></div>
+            <span>Selected</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch" style="background: #151822; border: 1px solid rgba(255,255,255,0.04); opacity: 0.5;"></div>
+            <span>Sold Out</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar Order Ledger -->
+      <aside class="order-summary-card">
+        <h3 class="summary-movie-title" id="summary-movie-title">Movie Title</h3>
+        <p class="summary-hall-name" id="summary-hall-details">Screen • Showtime</p>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; margin-top: 1rem;">
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+            Selected Seats (<span id="seat-count">0</span>/6 max):
+          </div>
+          <div class="selected-seats-chip-container" id="selected-seats-chips">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">No seats selected yet</span>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; margin-top: 0.5rem;">
+          <div class="price-line">
+            <span>Ticket Base Price:</span>
+            <span id="summary-base-price">₹0.00</span>
+          </div>
+          <div class="price-line">
+            <span>Convenience Fee (5%):</span>
+            <span id="summary-fee">₹0.00</span>
+          </div>
+          <div class="price-line">
+            <span>GST / Taxes (18%):</span>
+            <span id="summary-tax">₹0.00</span>
+          </div>
+          <div class="price-line total">
+            <span>Total Payable:</span>
+            <span style="color: var(--primary);" id="summary-total">₹0.00</span>
+          </div>
+        </div>
+
+        <button id="proceed-pay-btn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" disabled>
+          Proceed to Checkout ➔
+        </button>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Age Verification Modal (Fallback for direct navigation on 18+ shows) -->
+  <div id="age-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeAgeModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.75rem;">🔞</span>
+        <h3 style="font-size: 1.35rem; color: #fb7185;">Age-restricted movie</h3>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        This movie is restricted to users aged 18 years and above.
+      </p>
+
+      <form id="age-verification-form" onsubmit="handleAgeVerifySubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="age-dob">Date of Birth</label>
+          <input type="date" id="age-dob" class="form-control" required oninput="calculateAndValidateAge()" onchange="calculateAndValidateAge()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="age-proof-type">Age Proof Type</label>
+          <select id="age-proof-type" class="form-control" required onchange="calculateAndValidateAge()">
+            <option value="">-- Select Age Proof --</option>
+            <option value="Aadhaar Card">Aadhaar Card</option>
+            <option value="Passport">Passport</option>
+            <option value="Driving Licence">Driving Licence</option>
+            <option value="Voter ID">Voter ID</option>
+            <option value="Other Government-issued Photo ID">Other Government-issued Photo ID</option>
+          </select>
+        </div>
+
+        <div id="age-status-message" class="age-status-box"></div>
+
+        <div class="theatre-notice-box">
+          <span>ℹ️</span>
+          <span>Valid government-issued age proof may be checked at the theatre entrance. No identity document is uploaded or stored.</span>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeAgeModal()">Cancel</button>
+          <button type="submit" id="age-continue-btn" class="btn btn-primary" style="flex: 1;" disabled>Confirm & Continue ➔</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const showId = urlParams.get('showId') || 1;
+    let selectedSeatsMap = new Map(); // showSeatId -> seatObject
+    let currentMatrixData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadSeatMatrix();
+    });
+
+    async function loadSeatMatrix() {
+      try {
+        const res = await API.getSeatMatrix(showId);
+        currentMatrixData = res.data;
+
+        // Render Summary Header
+        document.getElementById('summary-movie-title').innerText = currentMatrixData.movieTitle;
+        const is18 = currentMatrixData.ageRestricted || currentMatrixData.censorRating === 'A' || currentMatrixData.ageRestriction === '18+';
+        if (is18) {
+          document.getElementById('summary-movie-title').innerHTML = `${currentMatrixData.movieTitle} <span class="age-badge-18" style="vertical-align: middle; margin-left: 6px;">18+</span>`;
+        }
+
+        let matrixDate = null;
+        if (Array.isArray(currentMatrixData.startTime) && currentMatrixData.startTime.length >= 3) {
+          const [y, m, day, h = 0, min = 0] = currentMatrixData.startTime;
+          matrixDate = new Date(y, m - 1, day, h, min);
+        } else if (currentMatrixData.startTime) {
+          matrixDate = new Date(currentMatrixData.startTime);
+        }
+        const timeStr = (matrixDate && !isNaN(matrixDate.getTime()))
+          ? matrixDate.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+          : 'Showtime';
+        document.getElementById('summary-hall-details').innerText = `${currentMatrixData.theatreName} • ${currentMatrixData.screenName} • ${timeStr}`;
+
+        // Render 2D Grid
+        renderMatrix(currentMatrixData.seatsByRow);
+      } catch (err) {
+        showToast('Failed to load cinema layout', 'error');
+      }
+    }
+
+    function renderMatrix(rowsData) {
+      const container = document.getElementById('seat-matrix-container');
+      container.innerHTML = '';
+
+      Object.keys(rowsData).forEach(rowLetter => {
+        const seats = rowsData[rowLetter];
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'seat-row';
+
+        // Row label
+        const label = document.createElement('div');
+        label.className = 'seat-row-label';
+        label.innerText = rowLetter;
+        rowDiv.appendChild(label);
+
+        // Seats in row
+        seats.forEach(seat => {
+          const seatDiv = document.createElement('div');
+          const isBooked = seat.status === 'BOOKED';
+          const tierClass = seat.seatType === 'VIP' ? 'tier-vip' : (seat.seatType === 'PREMIUM' ? 'tier-premium' : '');
+
+          seatDiv.className = `seat ${tierClass} ${isBooked ? 'booked' : ''}`;
+          seatDiv.innerText = seat.seatNumber;
+          seatDiv.title = `${seat.seatCode} (${seat.seatType}) - ₹${seat.price}`;
+
+          if (!isBooked) {
+            seatDiv.onclick = () => toggleSeatSelection(seat, seatDiv);
+          }
+
+          rowDiv.appendChild(seatDiv);
+        });
+
+        container.appendChild(rowDiv);
+      });
+    }
+
+    function toggleSeatSelection(seat, seatElement) {
+      if (selectedSeatsMap.has(seat.showSeatId)) {
+        selectedSeatsMap.delete(seat.showSeatId);
+        seatElement.classList.remove('selected');
+      } else {
+        if (selectedSeatsMap.size >= 6) {
+          showToast('Maximum 6 seats allowed per booking', 'error');
+          return;
+        }
+        selectedSeatsMap.set(seat.showSeatId, seat);
+        seatElement.classList.add('selected');
+      }
+
+      updateOrderSummary();
+    }
+
+    function updateOrderSummary() {
+      const chipsContainer = document.getElementById('selected-seats-chips');
+      const countSpan = document.getElementById('seat-count');
+      const baseSpan = document.getElementById('summary-base-price');
+      const feeSpan = document.getElementById('summary-fee');
+      const taxSpan = document.getElementById('summary-tax');
+      const totalSpan = document.getElementById('summary-total');
+      const proceedBtn = document.getElementById('proceed-pay-btn');
+
+      countSpan.innerText = selectedSeatsMap.size;
+
+      if (selectedSeatsMap.size === 0) {
+        chipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem;">No seats selected yet</span>`;
+        baseSpan.innerText = '₹0.00';
+        feeSpan.innerText = '₹0.00';
+        taxSpan.innerText = '₹0.00';
+        totalSpan.innerText = '₹0.00';
+        proceedBtn.disabled = true;
+        return;
+      }
+
+      // Render Chips
+      chipsContainer.innerHTML = '';
+      let subTotal = 0;
+
+      selectedSeatsMap.forEach(seat => {
+        subTotal += parseFloat(seat.price);
+        const chip = document.createElement('span');
+        chip.className = 'seat-chip';
+        chip.innerText = `${seat.seatCode} (₹${seat.price})`;
+        chipsContainer.appendChild(chip);
+      });
+
+      const convenienceFee = subTotal * 0.05;
+      const tax = subTotal * 0.18;
+      const total = subTotal + convenienceFee + tax;
+
+      baseSpan.innerText = `₹${subTotal.toFixed(2)}`;
+      feeSpan.innerText = `₹${convenienceFee.toFixed(2)}`;
+      taxSpan.innerText = `₹${tax.toFixed(2)}`;
+      totalSpan.innerText = `₹${total.toFixed(2)}`;
+      proceedBtn.disabled = false;
+    }
+
+    function isMatrixMovie18Plus() {
+      if (!currentMatrixData) return false;
+      return currentMatrixData.ageRestricted || currentMatrixData.censorRating === 'A' || currentMatrixData.ageRestriction === '18+';
+    }
+
+    document.getElementById('proceed-pay-btn').onclick = () => {
+      if (!API.getToken()) {
+        showToast('Please sign in or register to complete your booking', 'error');
+        openModal('login-modal');
+        return;
+      }
+
+      if (selectedSeatsMap.size === 0) {
+        showToast('Please select at least one seat to proceed to payment', 'error');
+        return;
+      }
+
+      if (isMatrixMovie18Plus()) {
+        const stored = sessionStorage.getItem('ageVerification');
+        let isVerified = false;
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            if (data.verified && data.dateOfBirth && data.ageProofType) {
+              isVerified = true;
+            }
+          } catch(e){}
+        }
+
+        if (!isVerified) {
+          document.getElementById('age-modal').classList.add('active');
+          calculateAndValidateAge();
+          return;
+        }
+      }
+
+      proceedToCheckout();
+    };
+
+    function proceedToCheckout() {
+      const seatIds = Array.from(selectedSeatsMap.keys());
+      let ageData = null;
+      if (isMatrixMovie18Plus()) {
+        try {
+          ageData = JSON.parse(sessionStorage.getItem('ageVerification'));
+        } catch(e){}
+      }
+
+      const checkoutState = {
+        showId: showId,
+        movieTitle: currentMatrixData.movieTitle,
+        theatreName: currentMatrixData.theatreName,
+        screenName: currentMatrixData.screenName,
+        startTime: currentMatrixData.startTime,
+        censorRating: currentMatrixData.censorRating,
+        ageRestriction: currentMatrixData.ageRestriction,
+        isAgeRestricted: isMatrixMovie18Plus(),
+        dateOfBirth: ageData ? ageData.dateOfBirth : null,
+        ageProofType: ageData ? ageData.ageProofType : null,
+        seats: Array.from(selectedSeatsMap.values()),
+        seatIds: seatIds
+      };
+
+      sessionStorage.setItem('cinereserve_checkout', JSON.stringify(checkoutState));
+      window.location.href = 'checkout.html';
+    }
+
+    function closeAgeModal() {
+      document.getElementById('age-modal').classList.remove('active');
+    }
+
+    function calculateAndValidateAge() {
+      const dobInput = document.getElementById('age-dob').value;
+      const proofSelect = document.getElementById('age-proof-type').value;
+      const statusBox = document.getElementById('age-status-message');
+      const continueBtn = document.getElementById('age-continue-btn');
+
+      if (!dobInput) {
+        statusBox.className = 'age-status-box';
+        statusBox.style.display = 'none';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      const dob = new Date(dobInput);
+      const today = new Date();
+
+      if (isNaN(dob.getTime())) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>⚠️</span><span>Please enter a valid Date of Birth.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      if (dob > today) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>⚠️</span><span>Date of birth cannot be in the future.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>🚫</span><span>Sorry, you must be 18 years or older to book this movie.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      if (!proofSelect) {
+        statusBox.className = 'age-status-box passed';
+        statusBox.innerHTML = '<span>ℹ️</span><span>Age: ' + age + ' years. Please select age proof type to continue.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      statusBox.className = 'age-status-box passed';
+      statusBox.innerHTML = '<span>✅</span><span>Age verification passed. You can continue booking.</span>';
+      continueBtn.disabled = false;
+      return true;
+    }
+
+    function handleAgeVerifySubmit(e) {
+      e.preventDefault();
+      if (!calculateAndValidateAge()) return;
+
+      const dob = document.getElementById('age-dob').value;
+      const proof = document.getElementById('age-proof-type').value;
+
+      sessionStorage.setItem('ageVerification', JSON.stringify({
+        movieId: currentMatrixData ? currentMatrixData.movieId : null,
+        dateOfBirth: dob,
+        ageProofType: proof,
+        verified: true
+      }));
+
+      closeAgeModal();
+      proceedToCheckout();
+    }
+  </script>
+</body>
+</html>

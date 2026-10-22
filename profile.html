@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-card {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #ef4444);
+      color: #000;
+      font-size: 2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-glow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="history.html" class="nav-link">My Bookings</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <div class="profile-card">
+      <div class="profile-avatar" id="prof-avatar">U</div>
+      <h1 style="font-size: 1.75rem; margin-bottom: 0.25rem;" id="prof-heading">User Profile</h1>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem;">Manage your account details and view booking preferences</p>
+
+      <form id="profile-form">
+        <div class="form-group">
+          <label class="form-label">Email Address (Registered)</label>
+          <input type="email" id="prof-email" class="form-control" disabled style="opacity: 0.6; cursor: not-allowed;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="prof-name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" id="prof-phone" class="form-control" placeholder="+91 9876543210">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Account Role</label>
+          <input type="text" id="prof-role" class="form-control" disabled style="opacity: 0.6; cursor: not-allowed;">
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Profile Changes</button>
+          <a href="history.html" class="btn btn-outline" style="flex: 1;">🎟️ View My Tickets</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = API.getUser();
+      if (!user) {
+        showToast('Please sign in to view your profile', 'error');
+        setTimeout(() => window.location.href = 'index.html', 1000);
+        return;
+      }
+
+      document.getElementById('prof-name').value = user.fullName || '';
+      document.getElementById('prof-email').value = user.email || '';
+      document.getElementById('prof-phone').value = user.phone || '';
+      document.getElementById('prof-role').value = user.role === 'ROLE_ADMIN' ? 'Cinema Administrator' : 'Standard Customer';
+      document.getElementById('prof-heading').innerText = user.fullName || 'User Profile';
+      document.getElementById('prof-avatar').innerText = (user.fullName || 'U').charAt(0).toUpperCase();
+
+      document.getElementById('profile-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('prof-name').value.trim();
+        const phone = document.getElementById('prof-phone').value.trim();
+
+        try {
+          const res = await API.request('/user/profile', {
+            method: 'PUT',
+            body: JSON.stringify({ fullName, phone })
+          });
+
+          // Update local session
+          const updatedUser = { ...user, fullName: res.data.fullName, phone: res.data.phone };
+          localStorage.setItem(API.USER_KEY, JSON.stringify(updatedUser));
+
+          showToast('Profile updated successfully!');
+          renderNavbarAuth();
+        } catch (err) {
+          showToast(err.message || 'Failed to update profile', 'error');
+        }
+      };
+    });
+  </script>
+</body>
+</html>

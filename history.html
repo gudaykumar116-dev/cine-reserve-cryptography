@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Booking History – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .history-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      transition: var(--transition);
+    }
+
+    @media (max-width: 768px) {
+      .history-card {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .history-card:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .history-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+    }
+    
+    .refund-info {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px dashed rgba(239, 68, 68, 0.3);
+        padding: 0.75rem;
+        border-radius: var(--radius-sm);
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Cancellation Modal Styles */
+    #cancel-modal .modal-content {
+        max-width: 450px;
+    }
+    .cancel-details {
+        background: var(--bg-body);
+        padding: 1rem;
+        border-radius: var(--radius-sm);
+        margin: 1rem 0;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+    .cancel-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .cancel-row.total {
+        font-weight: bold;
+        border-top: 1px dashed #555;
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .cancel-row.refund {
+        color: var(--accent-green);
+        font-weight: bold;
+    }
+    .cancel-row.retained {
+        color: var(--accent-orange);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">← Explore Movies</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">🎟️ My Bookings & Tickets</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">View active tickets, download invoices, or cancel reservations</p>
+      </div>
+    </div>
+
+    <div id="bookings-history-list">
+      <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading your booking history...
+      </div>
+    </div>
+  </main>
+  
+  <!-- Cancellation Modal -->
+  <div class="modal-overlay" id="cancel-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('cancel-modal')">✕</button>
+      <h2>Cancel Booking</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">Are you sure you want to cancel this booking?</p>
+      
+      <div class="cancel-details" id="cancel-preview-details">
+        <!-- Injected via JS -->
+      </div>
+      
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('cancel-modal')">Keep Booking</button>
+        <button class="btn btn-danger" style="flex: 1;" id="confirm-cancel-btn">Confirm Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let currentBookings = [];
+    let bookingToCancel = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = API.getUser();
+      if (!user) {
+        showToast('Please sign in to view your bookings', 'error');
+        document.getElementById('bookings-history-list').innerHTML = `
+          <div style="text-align: center; padding: 3rem;">
+            <h3>Please Sign In</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">You need to be logged in to access your booking records.</p>
+            <button onclick="openModal('login-modal')" class="btn btn-primary">Sign In Now</button>
+          </div>
+        `;
+        return;
+      }
+      await loadUserBookings();
+    });
+
+    function parseDate(val) {
+      if (!val) return null;
+      if (Array.isArray(val) && val.length >= 3) {
+        const [y, m, d, h = 0, min = 0, s = 0] = val;
+        return new Date(y, m - 1, d, h, min, s);
+      }
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatShowDateTime(val) {
+      const d = parseDate(val);
+      if (!d) return 'Time Unavailable';
+      return d.toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+      });
+    }
+
+    function formatBookingTimestamp(val) {
+      const d = parseDate(val);
+      if (!d) return 'Time Unavailable';
+      return d.toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: true
+      });
+    }
+
+    async function loadUserBookings() {
+      const container = document.getElementById('bookings-history-list');
+      try {
+        const res = await API.getMyBookings();
+        currentBookings = res.data || [];
+
+        if (!currentBookings.length) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 3rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🍿</div>
+              <h3>No Bookings Found</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">You have not booked any movie tickets yet.</p>
+              <a href="index.html" class="btn btn-primary">Explore Now Showing Movies</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = currentBookings.map(b => {
+          const isConfirmed = b.status === 'CONFIRMED';
+          const isCancelled = b.status === 'CANCELLED';
+          const showDateObj = parseDate(b.showStartTime);
+          const formattedShowTime = formatShowDateTime(b.showStartTime);
+          const formattedBookingTime = formatBookingTimestamp(b.bookingTime);
+          const formattedCancelledTime = b.cancelledAt ? formatBookingTimestamp(b.cancelledAt) : null;
+          const canCancel = isConfirmed && showDateObj && (showDateObj.getTime() - new Date().getTime() > 2 * 60 * 60 * 1000);
+
+          let refundHtml = '';
+          if (isCancelled && b.refundAmount !== undefined) {
+              refundHtml = `
+                <div class="refund-info">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span>Original Amount:</span> <strong>₹${b.totalAmount}</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:4px; color: var(--accent-green);">
+                    <span>Customer Refund (40%):</span> <strong>₹${b.refundAmount}</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:4px; color: var(--accent-orange);">
+                    <span>Theatre Retained (60%):</span> <strong>₹${b.theatreRetainedAmount}</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.1);">
+                    <span>Refund Status:</span> <strong>${b.refundStatus || 'INITIATED'}</strong>
+                  </div>
+                </div>
+              `;
+          }
+
+          return `
+            <div class="history-card">
+              <img src="${b.moviePosterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80'}" alt="${b.movieTitle}" class="history-poster" style="${isCancelled ? 'opacity: 0.5; filter: grayscale(1);' : ''}">
+              <div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.35rem;">
+                  <span class="badge ${isConfirmed ? 'badge-success' : 'badge-danger'}">${b.status}</span>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Ref: ${b.bookingNumber}</span>
+                </div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem; ${isCancelled ? 'text-decoration: line-through; color:#888;' : ''}">${b.movieTitle}</h3>
+                <div style="font-size: 0.92rem; color: var(--primary); font-weight: 600; margin-bottom: 0.35rem;">
+                  📍 ${b.theatreName} • ${b.screenName}
+                </div>
+                
+                <!-- Explicit Show Timings & Booking Timings -->
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.75rem; margin: 0.4rem 0 0.6rem 0; display: flex; flex-direction: column; gap: 0.25rem;">
+                  <div style="font-size: 0.88rem; color: #6ee7b7; font-weight: 600;">
+                    🎬 Show Time: <span>${formattedShowTime}</span>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-secondary);">
+                    🕒 Booked On: <span>${formattedBookingTime}</span>
+                  </div>
+                  ${isCancelled && formattedCancelledTime ? `
+                    <div style="font-size: 0.82rem; color: #fb7185;">
+                      ❌ Cancelled On: <span>${formattedCancelledTime}</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <div style="font-size: 0.88rem; color: #fff;">
+                  Seats: <strong style="color: var(--accent-cyan);">${b.seatNumbers ? b.seatNumbers.join(', ') : 'N/A'}</strong> • Total: <strong style="color: var(--accent-green);">₹${b.totalAmount}</strong>
+                </div>
+                ${refundHtml}
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px;">
+                ${isConfirmed ? `<a href="ticket.html?bookingNumber=${b.bookingNumber}" class="btn btn-sm btn-primary">📄 View E-Ticket</a>` : ''}
+                ${canCancel ? `
+                  <button onclick="previewCancel(${b.bookingId})" class="btn btn-sm btn-danger">✕ Cancel Booking</button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        container.innerHTML = `<div style="text-align: center; color: #fb7185; padding: 2rem;">Failed to fetch bookings.</div>`;
+      }
+    }
+
+    function previewCancel(bookingId) {
+        const booking = currentBookings.find(b => b.bookingId === bookingId);
+        if (!booking) return;
+        
+        bookingToCancel = bookingId;
+        const total = parseFloat(booking.totalAmount);
+        const refund = (total * 0.40).toFixed(2);
+        const retained = (total * 0.60).toFixed(2);
+
+        document.getElementById('cancel-preview-details').innerHTML = `
+            <div class="cancel-row"><span>Booking ID:</span> <span>${booking.bookingNumber}</span></div>
+            <div class="cancel-row"><span>Movie:</span> <span>${booking.movieTitle}</span></div>
+            <div class="cancel-row"><span>Seats:</span> <span>${booking.seatNumbers.join(', ')}</span></div>
+            
+            <div class="cancel-row total"><span>Total Amount:</span> <span>₹${total.toFixed(2)}</span></div>
+            
+            <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem; font-size:0.8rem; color:var(--text-secondary);">Refund Details:</div>
+            <div class="cancel-row refund"><span>Customer Refund (40%):</span> <span>₹${refund}</span></div>
+            <div class="cancel-row retained"><span>Theatre Retained (60%):</span> <span>₹${retained}</span></div>
+        `;
+
+        document.getElementById('confirm-cancel-btn').onclick = executeCancel;
+        openModal('cancel-modal');
+    }
+
+    async function executeCancel() {
+      if (!bookingToCancel) return;
+      const btn = document.getElementById('confirm-cancel-btn');
+      btn.innerText = 'Processing...';
+      btn.disabled = true;
+
+      try {
+        const res = await API.cancelBooking(bookingToCancel);
+        const cancelledBooking = res.data;
+        closeModal('cancel-modal');
+        
+        // Show success alert as requested
+        alert(`Booking cancelled successfully.\nRefund Amount: ₹${cancelledBooking.refundAmount}\nRefund Status: ${cancelledBooking.refundStatus || 'INITIATED/PROCESSING'}`);
+        
+        await loadUserBookings();
+      } catch (err) {
+        showToast(err.message || 'Failed to cancel booking', 'error');
+      } finally {
+        btn.innerText = 'Confirm Cancel';
+        btn.disabled = false;
+        bookingToCancel = null;
+      }
+    }
+  </script>
+</body>
+</html>

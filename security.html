@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security & Cryptography - CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .crypto-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .crypto-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .crypto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .crypto-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .crypto-card h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .algorithm-badge {
+      display: inline-block;
+      background: rgba(229,9,20,0.1);
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    .crypto-flow {
+      background: #111;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #00ff00;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="security.html" class="nav-link active">Security & Cryptography</a></li>
+    </ul>
+  </nav>
+
+  <main class="crypto-container">
+    <div class="crypto-header">
+      <h1>Secure Online Movie Ticket Booking System Using Cryptography</h1>
+      <p style="color: #aaa; margin-top: 10px;">Demonstrating practical applications of cryptography inside a real-world booking system.</p>
+    </div>
+
+    <div class="crypto-grid">
+      <!-- Feature 1: Password Security -->
+      <div class="crypto-card">
+        <h3>1. Password Security</h3>
+        <div class="algorithm-badge">Algorithm: BCrypt</div>
+        <p style="font-size: 0.9rem; margin-bottom: 15px;">Never store plain-text passwords. BCrypt is used to securely hash user passwords before storing them in the database.</p>
+        <div class="crypto-flow">
+Registration:
+Password → BCrypt Hash → Database
+
+Login:
+Password → BCrypt Verify ← Database
+        </div>
+      </div>
+
+      <!-- Feature 2: Booking Integrity -->
+      <div class="crypto-card">
+        <h3>2. Booking Integrity</h3>
+        <div class="algorithm-badge">Algorithm: SHA-256</div>
+        <p style="font-size: 0.9rem; margin-bottom: 15px;">Detect modification of booking/ticket data. The hash ensures that the ticket data hasn't been altered.</p>
+        <div class="crypto-flow">
+Data = BookingID + Email + TotalAmount
+Hash = SHA-256(Data)
+
+View Ticket:
+Recalculate SHA-256(Data) == Stored Hash ?
+✅ VERIFIED : ❌ FAILED
+        </div>
+      </div>
+
+      <!-- Feature 3: Data Confidentiality -->
+      <div class="crypto-card">
+        <h3>3. Data Confidentiality</h3>
+        <div class="algorithm-badge">Algorithm: AES-256-GCM</div>
+        <p style="font-size: 0.9rem; margin-bottom: 15px;">Protect selected sensitive data such as payment methods and addresses using symmetric encryption.</p>
+        <div class="crypto-flow">
+Sensitive Data (Payment Info)
+        ↓
+AES-256-GCM Encryption
+        ↓
+Database (Encrypted)
+        ↓
+Authorized Backend
+        ↓
+Decryption → Original Data
+        </div>
+      </div>
+
+      <!-- Feature 4: Ticket Authenticity -->
+      <div class="crypto-card">
+        <h3>4. Ticket Authenticity</h3>
+        <div class="algorithm-badge">Algorithm: RSA Digital Signature</div>
+        <p style="font-size: 0.9rem; margin-bottom: 15px;">Verify ticket authenticity using Public/Private key pairs. The private key remains secure on the backend.</p>
+        <div class="crypto-flow">
+Booking Data
+        ↓
+Sign with RSA Private Key
+        ↓
+Digital Signature Stored
+
+View Ticket:
+Verify with RSA Public Key
+✅ VALID : ❌ INVALID
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <h2 style="margin-bottom: 20px;">Architecture Overview</h2>
+        <div class="crypto-card">
+            <pre style="color: #aaa; font-family: monospace; font-size: 0.9rem; line-height: 1.5;">
+User
+ ↓
+Login (BCrypt Verification)
+ ↓
+Movie & Seat Selection
+ ↓
+Payment & Booking (AES-256-GCM for sensitive data)
+ ↓
+Integrity Generation (SHA-256)
+ ↓
+Digital Signature Generation (RSA)
+ ↓
+Secure Ticket Issued
+            </pre>
+        </div>
+    </div>
+  </main>
+</body>
+</html>

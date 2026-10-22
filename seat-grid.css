@@ -1,0 +1,225 @@
+/* =====================================================================
+   cinereserve: Interactive 2D Seat Matrix & Screen Styles
+   ===================================================================== */
+
+.booking-layout-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .booking-layout-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cinema-hall-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: auto;
+  backdrop-filter: blur(12px);
+}
+
+/* Screen Curve Representation */
+.screen-visual-wrap {
+  width: 80%;
+  max-width: 500px;
+  margin-bottom: 3.5rem;
+  text-align: center;
+}
+
+.screen-curve {
+  height: 12px;
+  width: 100%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), #ffffff, var(--accent-cyan), transparent);
+  box-shadow: 0 4px 24px rgba(6, 182, 212, 0.6);
+  margin-bottom: 0.75rem;
+}
+
+.screen-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* Seat Grid */
+.seat-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 650px;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.seat-row-label {
+  width: 24px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Individual Seat Styling */
+.seat {
+  width: 34px;
+  height: 32px;
+  border-radius: 6px 6px 4px 4px;
+  background: #23283b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  position: relative;
+}
+
+.seat:not(.booked):hover {
+  transform: translateY(-3px) scale(1.1);
+  border-color: var(--primary);
+  color: #fff;
+  background: #333a54;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Tier Variations */
+.seat.tier-vip {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+
+.seat.tier-premium {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.1);
+  color: #c4b5fd;
+}
+
+/* States */
+.seat.selected {
+  background: var(--primary) !important;
+  color: #000 !important;
+  font-weight: 800;
+  border-color: #fff !important;
+  box-shadow: 0 0 16px var(--primary);
+  transform: translateY(-2px);
+}
+
+.seat.booked {
+  background: #151822 !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
+  color: #3b4256 !important;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.seat.booked::after {
+  content: "✕";
+  font-size: 0.7rem;
+}
+
+/* Legend */
+.seat-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.legend-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+/* Sidebar Order Summary */
+.order-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 90px;
+}
+
+.summary-movie-title {
+  font-size: 1.3rem;
+  margin-bottom: 0.25rem;
+}
+
+.summary-hall-name {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 1.25rem;
+}
+
+.selected-seats-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 40px;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.seat-chip {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.price-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
+}
+
+.price-line.total {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.85rem;
+  margin-top: 0.85rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}

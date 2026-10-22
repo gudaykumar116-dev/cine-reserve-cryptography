@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineReserve – Book Movie Tickets Online</title>
+  <meta name="description" content="Book movie tickets online for the latest blockbusters with interactive 2D seat selection and instant confirmation.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link active">Now Showing</a></li>
+      <li><a href="#coming-soon-section" class="nav-link">Coming Soon</a></li>
+      <li><a href="history.html" class="nav-link">My Bookings</a></li>
+    </ul>
+
+    <div id="navbar-auth-section" class="nav-auth">
+      <!-- Injected dynamically via auth.js -->
+    </div>
+  </nav>
+
+  <!-- Hero Featured Movie Banner -->
+  <main class="container">
+    <section class="hero-banner" id="hero-banner" style="background-image: linear-gradient(90deg, #0b0f19 0%, rgba(11, 15, 25, 0.95) 38%, rgba(11, 15, 25, 0.72) 70%, rgba(11, 15, 25, 0.35) 100%), radial-gradient(circle at 85% 45%, rgba(225, 29, 72, 0.28) 0%, transparent 65%), radial-gradient(circle at 15% 85%, rgba(245, 158, 11, 0.12) 0%, transparent 55%), url('images/gladiator2.jpg'); background-size: cover; background-position: right center;">
+      <div class="hero-content">
+        <span class="hero-tag">🔥 Featured Premiere</span>
+        <h1 class="hero-title" id="hero-title">Gladiator II</h1>
+        <div class="hero-meta" style="display: flex; gap: 0.65rem; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary); flex-wrap: wrap;">
+          <span style="background: rgba(225, 29, 72, 0.2); color: #fb7185; padding: 0.2rem 0.55rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(225, 29, 72, 0.35);">U/A 16+</span>
+          <span>⏱ 148m</span>
+          <span>•</span>
+          <span>Action / Epic / Drama</span>
+          <span>•</span>
+          <span>English</span>
+        </div>
+        <p class="hero-desc" id="hero-desc">Years after witnessing the death of Maximus, Lucius enters the Colosseum to fight for Rome's destiny in Ridley Scott's epic masterpiece.</p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="movie-details.html?id=10" class="btn btn-primary" id="hero-book-btn">🎟️ Movie Details</a>
+          <a href="https://www.youtube.com/watch?v=4rgYUipGJNo" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(6px); text-decoration: none; display: inline-flex; align-items: center;">▶ Watch Trailer</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter Controls -->
+    <section class="section-header">
+      <div>
+        <h2 class="section-title">🍿 Now Showing</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Explore trending cinema blockbusters near you</p>
+      </div>
+
+      <div class="search-filter-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="Search by title or genre...">
+        <select id="genre-filter" class="select-input">
+          <option value="">All Genres</option>
+        </select>
+        <select id="lang-filter" class="select-input">
+          <option value="">All Languages</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Movie Catalog Grid -->
+    <section class="movie-grid" id="now-showing-grid">
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading cinema catalog...
+      </div>
+    </section>
+
+    <!-- Coming Soon Section -->
+    <section class="section-header" id="coming-soon-section" style="margin-top: 4rem;">
+      <div>
+        <h2 class="section-title">✨ Coming Soon to Theatres</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Upcoming premieres and anticipated releases</p>
+      </div>
+    </section>
+
+    <section class="movie-grid" id="coming-soon-grid">
+      <!-- Injected via JavaScript -->
+    </section>
+  </main>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('login-modal')">×</button>
+      <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Welcome to CineReserve</h3>
+      <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">Sign in to your account to reserve seats</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-control" required placeholder="name@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Sign In</button>
+      </form>
+
+      <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+        Don't have an account? <a href="#" id="to-register-link" style="color: var(--primary); font-weight: 600;">Sign up</a>
+      </div>
+      <div style="margin-top: 0.75rem; text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+        Demo Admin: <code>admin@cinereserve.com</code> / <code>admin123</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="register-modal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('register-modal')">×</button>
+      <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Create an Account</h3>
+      <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">Join CineReserve for seamless movie ticket reservations</p>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" required placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" class="form-control" required placeholder="name@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">Phone Number</label>
+          <input type="tel" id="reg-phone" class="form-control" placeholder="+91 9876543210">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password (min 6 characters)</label>
+          <input type="password" id="reg-password" class="form-control" minlength="6" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Create Account</button>
+      </form>
+
+      <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+        Already have an account? <a href="#" id="to-login-link" style="color: var(--primary); font-weight: 600;">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/trailer.js"></script>
+  <script>
+    let allMovies = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!API.getToken()) {
+        document.querySelector('main').style.display = 'none';
+        
+        // Show register modal first instead of login
+        const regModal = document.getElementById('register-modal');
+        regModal.classList.add('active');
+        const regCloseBtn = regModal.querySelector('.modal-close');
+        if (regCloseBtn) regCloseBtn.style.display = 'none';
+        
+        const loginModal = document.getElementById('login-modal');
+        const loginCloseBtn = loginModal.querySelector('.modal-close');
+        if (loginCloseBtn) loginCloseBtn.style.display = 'none';
+        return;
+      }
+
+      await loadMovies();
+      await loadFilters();
+      setupSearchListeners();
+    });
+
+    async function loadMovies() {
+      try {
+        const nowShowingRes = await API.getNowShowing();
+        allMovies = nowShowingRes.data || [];
+        renderMovieGrid(allMovies, 'now-showing-grid');
+
+        const comingSoonRes = await API.getComingSoon();
+        renderMovieGrid(comingSoonRes.data || [], 'coming-soon-grid', true);
+      } catch (err) {
+        document.getElementById('now-showing-grid').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #fb7185;">
+            Failed to connect to backend server. Make sure Spring Boot is running on port 8080.
+          </div>
+        `;
+      }
+    }
+
+    function renderMovieGrid(movies, targetElementId, isComingSoon = false) {
+      const container = document.getElementById(targetElementId);
+      if (!container) return;
+
+      if (!movies.length) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-muted);">No movies found matching criteria.</div>`;
+        return;
+      }
+
+      container.innerHTML = movies.map(movie => {
+        const is18 = movie.ageRestricted || movie.censorRating === 'A' || movie.ageRestriction === '18+';
+        const censorLabel = is18 ? '18+' : (movie.censorRating || 'U/A');
+        const censorClass = is18 ? 'movie-censor-badge age-badge-18' : 'movie-censor-badge';
+        const posterSrc = getPosterForMovie(movie);
+        const trailerSrc = getTrailerForMovie(movie);
+        const safeTitle = encodeURIComponent(movie.title);
+
+        return `
+        <div class="movie-card">
+          <div class="movie-poster-wrap" onclick="openTrailerDirectly('${trailerSrc}', '${safeTitle}')" title="Click to watch ${movie.title} trailer">
+            <img src="${posterSrc}" alt="${movie.title}" class="movie-poster" loading="lazy" onerror="this.onerror=null;this.src='images/rrr.jpg';">
+            <span class="${censorClass}">${censorLabel}</span>
+            <div class="poster-play-overlay">
+              <div class="play-circle-icon">▶</div>
+            </div>
+          </div>
+          <div class="movie-info">
+            <div class="movie-genre">${movie.genre}</div>
+            <h3 class="movie-title" title="${movie.title}">${movie.title}</h3>
+            <div class="movie-meta">
+              <span>⏱ ${movie.durationMinutes}m</span>
+              <span>•</span>
+              <span>🗣 ${movie.language}</span>
+            </div>
+            <div class="movie-card-footer" style="display: flex; gap: 0.5rem; align-items: center;">
+              ${isComingSoon ? 
+                `<a href="${trailerSrc}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">▶ Watch Trailer</a>` :
+                `<a href="movie-details.html?id=${movie.id}" class="btn btn-primary btn-sm" style="flex: 1.2;">🎟️ Book</a>
+                 <a href="${trailerSrc}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" title="Watch trailer">▶ Trailer</a>`
+              }
+            </div>
+          </div>
+        </div>
+      `;}).join('');
+    }
+
+    async function loadFilters() {
+      try {
+        const [genresRes, langsRes] = await Promise.all([API.getGenres(), API.getLanguages()]);
+        
+        const genreSelect = document.getElementById('genre-filter');
+        (genresRes.data || []).forEach(g => {
+          genreSelect.innerHTML += `<option value="${g}">${g}</option>`;
+        });
+
+        const langSelect = document.getElementById('lang-filter');
+        (langsRes.data || []).forEach(l => {
+          langSelect.innerHTML += `<option value="${l}">${l}</option>`;
+        });
+      } catch (e) {
+        console.error('Filter loading failed', e);
+      }
+    }
+
+    function setupSearchListeners() {
+      const searchInput = document.getElementById('search-input');
+      const genreFilter = document.getElementById('genre-filter');
+      const langFilter = document.getElementById('lang-filter');
+
+      const applyFilters = () => {
+        const query = searchInput.value.toLowerCase().trim();
+        const selectedGenre = genreFilter.value;
+        const selectedLang = langFilter.value;
+
+        const filtered = allMovies.filter(m => {
+          const matchesQuery = !query || m.title.toLowerCase().includes(query) || m.genre.toLowerCase().includes(query);
+          const matchesGenre = !selectedGenre || m.genre.includes(selectedGenre);
+          const matchesLang = !selectedLang || m.language === selectedLang;
+          return matchesQuery && matchesGenre && matchesLang;
+        });
+
+        renderMovieGrid(filtered, 'now-showing-grid');
+      };
+
+      searchInput.addEventListener('input', applyFilters);
+      genreFilter.addEventListener('change', applyFilters);
+      langFilter.addEventListener('change', applyFilters);
+    }
+  </script>
+</body>
+</html>

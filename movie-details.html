@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Details & Showtimes – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .details-hero {
+      position: relative;
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      margin-bottom: 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .details-hero {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+      }
+    }
+
+    .details-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .date-picker-tabs {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .date-tab {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      text-align: center;
+      transition: var(--transition);
+      min-width: 110px;
+    }
+
+    .date-tab:hover, .date-tab.active {
+      border-color: var(--primary);
+      color: #000;
+      background: var(--primary);
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .theatre-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .theatre-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theatre-address {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .showtimes-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .showtime-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .showtime-chip:hover {
+      border-color: var(--primary);
+      background: rgba(245, 158, 11, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .showtime-chip .time {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .showtime-chip .screen-info {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">← Back to Movies</a></li>
+      <li><a href="history.html" class="nav-link">My Bookings</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <!-- Movie Info Hero -->
+    <section class="details-hero" id="movie-hero">
+      <img id="detail-poster" src="" alt="Movie Poster" class="details-poster" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80';">
+      <div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+          <span class="hero-tag" id="detail-genre">Sci-Fi</span>
+          <span class="badge badge-warning" id="detail-censor">U/A</span>
+        </div>
+        <h1 class="hero-title" id="detail-title">Loading Movie...</h1>
+        
+        <!-- Age Warning Banner (Injected dynamically for 18+ movies) -->
+        <div id="detail-age-banner" style="display: none;"></div>
+
+        <div class="movie-meta" style="font-size: 0.95rem; margin-bottom: 1.25rem;">
+          <span id="detail-duration">⏱ 169 mins</span>
+          <span>•</span>
+          <span id="detail-lang">🗣 English</span>
+          <span>•</span>
+          <span id="detail-release">📅 2026-09-15</span>
+        </div>
+        <p class="hero-desc" id="detail-description" style="margin-bottom: 1.5rem;"></p>
+        <a id="detail-trailer-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="display: none; text-decoration: none; align-items: center; gap: 0.35rem;">▶ Watch Official Trailer</a>
+      </div>
+    </section>
+
+    <!-- Movie Cast & Crew Profile -->
+    <section class="section-header" style="margin-top: 2rem;">
+      <h2 class="section-title">🌟 Cast & Crew</h2>
+    </section>
+    <div class="cast-grid" id="cast-crew-container">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Date Picker Tabs -->
+    <section class="section-header" style="margin-top: 2.5rem;">
+      <h2 class="section-title">🕒 Select Showtime & Date</h2>
+    </section>
+
+    <!-- City Filter Pills -->
+    <div class="city-filters" id="city-filters">
+      <div class="city-chip active" onclick="filterByCity('ALL')">All Cities (All Theatres)</div>
+      <div class="city-chip" onclick="filterByCity('Hyderabad')">📍 Hyderabad</div>
+      <div class="city-chip" onclick="filterByCity('Bengaluru')">📍 Bengaluru</div>
+      <div class="city-chip" onclick="filterByCity('Mumbai')">📍 Mumbai</div>
+      <div class="city-chip" onclick="filterByCity('Delhi')">📍 Delhi</div>
+      <div class="city-chip" onclick="filterByCity('Chennai')">📍 Chennai</div>
+    </div>
+
+    <div class="date-picker-tabs" id="date-tabs">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Theatres and Showtimes List -->
+    <section id="theatres-container">
+      <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading scheduled showtimes...
+      </div>
+    </section>
+  </main>
+
+  <!-- Age Verification Modal (for 18+ Movies) -->
+  <div id="age-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeAgeModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.75rem;">🔞</span>
+        <h3 style="font-size: 1.35rem; color: #fb7185;">Age-restricted movie</h3>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        This movie is restricted to users aged 18 years and above.
+      </p>
+
+      <form id="age-verification-form" onsubmit="handleAgeVerifySubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="age-dob">Date of Birth</label>
+          <input type="date" id="age-dob" class="form-control" required oninput="calculateAndValidateAge()" onchange="calculateAndValidateAge()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="age-proof-type">Age Proof Type</label>
+          <select id="age-proof-type" class="form-control" required onchange="calculateAndValidateAge()">
+            <option value="">-- Select Age Proof --</option>
+            <option value="Aadhaar Card">Aadhaar Card</option>
+            <option value="Passport">Passport</option>
+            <option value="Driving Licence">Driving Licence</option>
+            <option value="Voter ID">Voter ID</option>
+            <option value="Other Government-issued Photo ID">Other Government-issued Photo ID</option>
+          </select>
+        </div>
+
+        <div id="age-status-message" class="age-status-box"></div>
+
+        <div class="theatre-notice-box">
+          <span>ℹ️</span>
+          <span>Valid government-issued age proof may be checked at the theatre entrance. No identity document is uploaded or stored.</span>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeAgeModal()">Cancel</button>
+          <button type="submit" id="age-continue-btn" class="btn btn-primary" style="flex: 1;" disabled>Continue Booking ➔</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/trailer.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id') || 1;
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let currentMovie = null;
+    let pendingShowId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      buildDateTabs();
+      await loadMovieDetails();
+      await loadShowsForSelectedDate();
+    });
+
+    function buildDateTabs() {
+      const container = document.getElementById('date-tabs');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 4; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayName = i === 0 ? 'Today' : (i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short' }));
+        const formattedDate = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+        const tab = document.createElement('div');
+        tab.className = `date-tab ${i === 0 ? 'active' : ''}`;
+        tab.innerHTML = `<div>${dayName}</div><div style="font-size: 0.8rem; font-weight: normal;">${formattedDate}</div>`;
+        tab.onclick = () => {
+          document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          selectedDate = dateStr;
+          loadShowsForSelectedDate();
+        };
+        container.appendChild(tab);
+      }
+    }
+    let selectedCity = 'ALL';
+    let allShowsCache = [];
+
+    async function loadMovieDetails() {
+      try {
+        const res = await API.getMovieById(movieId);
+        currentMovie = res.data;
+
+        document.title = `${currentMovie.title} – Showtimes – CineReserve`;
+        document.getElementById('detail-title').innerText = currentMovie.title;
+        document.getElementById('detail-genre').innerText = currentMovie.genre;
+        
+        const is18Plus = currentMovie.ageRestricted || currentMovie.censorRating === 'A' || currentMovie.ageRestriction === '18+';
+        const censorEl = document.getElementById('detail-censor');
+        if (is18Plus) {
+          censorEl.className = 'age-badge-18';
+          censorEl.innerText = '18+ (A)';
+          const bannerEl = document.getElementById('detail-age-banner');
+          bannerEl.className = 'age-banner-alert';
+          bannerEl.style.display = 'flex';
+          bannerEl.innerHTML = `
+            <span style="font-size: 1.3rem;">🔞</span>
+            <div>
+              <strong>Age-restricted movie (18+)</strong>
+              <div style="font-size: 0.85rem; opacity: 0.9;">This movie is restricted to users aged 18 years and above. Valid government-issued age proof may be checked at the theatre entrance.</div>
+            </div>
+          `;
+        } else {
+          censorEl.className = 'badge badge-warning';
+          censorEl.innerText = currentMovie.censorRating || 'U/A';
+        }
+
+        document.getElementById('detail-duration').innerText = `⏱ ${currentMovie.durationMinutes} mins`;
+        document.getElementById('detail-lang').innerText = `🗣 ${currentMovie.language}`;
+        document.getElementById('detail-release').innerText = `📅 ${currentMovie.releaseDate || 'In Theatres'}`;
+        document.getElementById('detail-description').innerText = currentMovie.description;
+        document.getElementById('detail-poster').src = getPosterForMovie(currentMovie);
+        
+        // Background banner kept clean and blank per request
+        const trailerUrl = getTrailerForMovie(currentMovie);
+        if (trailerUrl) {
+          const trailerBtn = document.getElementById('detail-trailer-btn');
+          trailerBtn.style.display = 'inline-flex';
+        }
+
+        // Render Cast & Crew Cards
+        renderCastAndCrew(currentMovie);
+
+      } catch (err) {
+        showToast('Failed to load movie details', 'error');
+        document.getElementById('detail-title').innerText = 'Unable to load movie details. Please try again.';
+        document.getElementById('detail-description').innerText = '';
+        document.getElementById('theatres-container').innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">No movie information available.</div>';
+      }
+    }
+
+    function playCurrentMovieTrailer() {
+      if (currentMovie) {
+        const trailerUrl = getTrailerForMovie(currentMovie);
+        openTrailerDirectly(trailerUrl, encodeURIComponent(currentMovie.title));
+      }
+    }
+
+    function renderCastAndCrew(movie) {
+      const container = document.getElementById('cast-crew-container');
+      const castItems = [];
+
+      if (movie.director) castItems.push({ role: '🎬 Director', name: movie.director });
+      if (movie.producer) castItems.push({ role: '💼 Producer', name: movie.producer });
+      if (movie.hero) castItems.push({ role: '🌟 Lead Hero / Actor', name: movie.hero });
+      if (movie.heroine) castItems.push({ role: '✨ Lead Heroine / Actress', name: movie.heroine });
+      if (movie.musicDirector) castItems.push({ role: '🎵 Music Director', name: movie.musicDirector });
+      if (movie.cinematography) castItems.push({ role: '🎥 Cinematographer', name: movie.cinematography });
+      if (movie.cast) castItems.push({ role: '👥 Star Cast', name: movie.cast });
+
+      if (castItems.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;">Cast details available in cinemas.</div>`;
+        return;
+      }
+
+      container.innerHTML = castItems.map(item => `
+        <div class="cast-card">
+          <span class="cast-role">${item.role}</span>
+          <span class="cast-name">${item.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function filterByCity(cityName) {
+      selectedCity = cityName;
+      document.querySelectorAll('#city-filters .city-chip').forEach(chip => {
+        if (chip.innerText.includes(cityName) || (cityName === 'ALL' && chip.innerText.includes('All Cities'))) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+      renderGroupedShows(allShowsCache);
+    }
+
+    async function loadShowsForSelectedDate() {
+      const container = document.getElementById('theatres-container');
+      container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Fetching available screenings...</div>`;
+
+      try {
+        const res = await API.getShowsForMovie(movieId, selectedDate);
+        allShowsCache = res.data || [];
+        renderGroupedShows(allShowsCache);
+      } catch (err) {
+        container.innerHTML = `<div style="text-align: center; color: #fb7185; padding: 2rem;">Error loading showtimes.</div>`;
+      }
+    }
+
+    function renderGroupedShows(shows) {
+      const container = document.getElementById('theatres-container');
+      
+      let filtered = shows;
+      if (selectedCity !== 'ALL') {
+        filtered = shows.filter(s => s.theatreCity && s.theatreCity.toLowerCase().includes(selectedCity.toLowerCase()));
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="theatre-card" style="text-align: center; padding: 3rem;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">No shows available for ${selectedCity === 'ALL' ? 'this date' : selectedCity}</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Please select another date tab or choose "All Cities" to view multiplex showtimes.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group shows by Theatre
+      const groupedTheatres = {};
+      filtered.forEach(show => {
+        if (!groupedTheatres[show.theatreName]) {
+          groupedTheatres[show.theatreName] = {
+            name: show.theatreName,
+            city: show.theatreCity,
+            shows: []
+          };
+        }
+        groupedTheatres[show.theatreName].shows.push(show);
+      });
+
+      container.innerHTML = Object.values(groupedTheatres).map(th => `
+        <div class="theatre-card">
+          <h3 class="theatre-title">🏛️ ${th.name}</h3>
+          <div class="theatre-address">📍 ${th.city} • 4K Laser Projection • Dolby Atmos Sound • Air Conditioned</div>
+
+          <div class="showtimes-grid">
+            ${th.shows.map(show => {
+              let d = null;
+              if (Array.isArray(show.startTime) && show.startTime.length >= 3) {
+                const [y, m, day, h = 0, min = 0] = show.startTime;
+                d = new Date(y, m - 1, day, h, min);
+              } else if (show.startTime) {
+                d = new Date(show.startTime);
+              }
+              const startTime = (d && !isNaN(d.getTime()))
+                ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                : 'Showtime';
+              return `
+                <a href="javascript:void(0)" onclick="handleShowtimeSelect(${show.id})" class="showtime-chip">
+                  <span class="time">${startTime}</span>
+                  <span class="screen-info">${show.screenName}</span>
+                </a>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function isCurrentMovie18Plus() {
+      if (!currentMovie) return false;
+      return currentMovie.ageRestricted || currentMovie.censorRating === 'A' || currentMovie.ageRestriction === '18+';
+    }
+
+    function handleShowtimeSelect(showId) {
+      if (isCurrentMovie18Plus()) {
+        const stored = sessionStorage.getItem('ageVerification');
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            if (data.verified && data.movieId == movieId) {
+              window.location.href = `seat-booking.html?showId=${showId}`;
+              return;
+            }
+          } catch(e){}
+        }
+        pendingShowId = showId;
+        document.getElementById('age-modal').classList.add('active');
+        calculateAndValidateAge();
+      } else {
+        window.location.href = `seat-booking.html?showId=${showId}`;
+      }
+    }
+
+    function closeAgeModal() {
+      document.getElementById('age-modal').classList.remove('active');
+      pendingShowId = null;
+    }
+
+    function calculateAndValidateAge() {
+      const dobInput = document.getElementById('age-dob').value;
+      const proofSelect = document.getElementById('age-proof-type').value;
+      const statusBox = document.getElementById('age-status-message');
+      const continueBtn = document.getElementById('age-continue-btn');
+
+      if (!dobInput) {
+        statusBox.className = 'age-status-box';
+        statusBox.style.display = 'none';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      const dob = new Date(dobInput);
+      const today = new Date();
+
+      if (isNaN(dob.getTime())) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>⚠️</span><span>Please enter a valid Date of Birth.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      if (dob > today) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>⚠️</span><span>Date of birth cannot be in the future.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        statusBox.className = 'age-status-box failed';
+        statusBox.innerHTML = '<span>🚫</span><span>Sorry, you must be 18 years or older to book this movie.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      if (!proofSelect) {
+        statusBox.className = 'age-status-box passed';
+        statusBox.innerHTML = '<span>ℹ️</span><span>Age: ' + age + ' years. Please select age proof type to continue.</span>';
+        continueBtn.disabled = true;
+        return false;
+      }
+
+      statusBox.className = 'age-status-box passed';
+      statusBox.innerHTML = '<span>✅</span><span>Age verification passed. You can continue booking.</span>';
+      continueBtn.disabled = false;
+      return true;
+    }
+
+    function handleAgeVerifySubmit(e) {
+      e.preventDefault();
+      if (!calculateAndValidateAge()) return;
+
+      const dob = document.getElementById('age-dob').value;
+      const proof = document.getElementById('age-proof-type').value;
+
+      sessionStorage.setItem('ageVerification', JSON.stringify({
+        movieId: movieId,
+        dateOfBirth: dob,
+        ageProofType: proof,
+        verified: true
+      }));
+
+      closeAgeModal();
+      if (pendingShowId) {
+        window.location.href = `seat-booking.html?showId=${pendingShowId}`;
+      }
+    }
+
+
+  </script>
+</body>
+</html>

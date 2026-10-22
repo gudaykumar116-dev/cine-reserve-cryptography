@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment & Checkout – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .payment-option-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .payment-option-card:hover, .payment-option-card.selected {
+      border-color: var(--primary);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .payment-option-card.selected .radio-dot {
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border-subtle);
+      transition: var(--transition);
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">Cancel & Return Home</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="section-title">🔒 Secure Checkout</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Review your order and select payment method</p>
+      </div>
+      <div class="timer-badge">
+        ⏱ Session Expires in: <span id="checkout-timer">09:59</span>
+      </div>
+    </div>
+
+    <div class="checkout-grid">
+      
+      <!-- Payment Method Selection -->
+      <section>
+        <h3 style="font-size: 1.2rem; margin-bottom: 1rem;">Select Payment Method</h3>
+
+        <div class="payment-option-card selected" onclick="selectPaymentMethod('UPI', this)">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 1.75rem;">📱</span>
+            <div>
+              <div style="font-weight: 700; color: #fff;">UPI (Google Pay, PhonePe, Paytm)</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">Instant approval via any UPI App / QR</div>
+            </div>
+          </div>
+          <div class="radio-dot"></div>
+        </div>
+
+        <div class="payment-option-card" onclick="selectPaymentMethod('CREDIT_CARD', this)">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 1.75rem;">💳</span>
+            <div>
+              <div style="font-weight: 700; color: #fff;">Credit / Debit Card</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">Visa, MasterCard, RuPay</div>
+            </div>
+          </div>
+          <div class="radio-dot"></div>
+        </div>
+
+        <div class="payment-option-card" onclick="selectPaymentMethod('NET_BANKING', this)">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 1.75rem;">🏦</span>
+            <div>
+              <div style="font-weight: 700; color: #fff;">Net Banking</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">All Indian & International Banks</div>
+            </div>
+          </div>
+          <div class="radio-dot"></div>
+        </div>
+
+        <div class="payment-option-card" onclick="selectPaymentMethod('WALLET', this)">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 1.75rem;">👛</span>
+            <div>
+              <div style="font-weight: 700; color: #fff;">Digital Wallet</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary);">Amazon Pay, Mobikwik</div>
+            </div>
+          </div>
+          <div class="radio-dot"></div>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 1rem; margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.25rem;">🛡️</span>
+          <span style="font-size: 0.85rem; color: var(--accent-green);">
+            Simulated Sandbox Mode: No real money will be charged. Click "Pay Now" to complete instant transactional booking.
+          </span>
+        </div>
+
+        <div id="payment-details-form" style="margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <h4 id="pay-detail-title" style="margin-bottom: 1rem;">UPI Details</h4>
+          <div class="form-group">
+            <label class="form-label" id="pay-address-label" for="pay-address">UPI ID</label>
+            <input type="text" id="pay-address" class="form-control" placeholder="user@upi" value="user@upi" required>
+          </div>
+          <div class="form-group" id="pay-pin-group" style="display: none;">
+            <label class="form-label" id="pay-pin-label" for="pay-pin">PIN</label>
+            <input type="password" id="pay-pin" class="form-control" placeholder="***">
+          </div>
+        </div>
+      </section>
+
+      <!-- Order Summary Card -->
+      <aside class="order-summary-card">
+        <h3 class="summary-movie-title" id="chk-movie-title">Movie</h3>
+        <p class="summary-hall-name" id="chk-hall-info">Screen • Showtime</p>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; margin-top: 1rem;">
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Reserved Seats:</div>
+          <div class="selected-seats-chip-container" id="chk-seat-chips"></div>
+        </div>
+
+        <!-- Coupon Code Box -->
+        <div class="coupon-box" style="margin-top: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="coupon-badge">🎁 SPECIAL OFFER</span>
+            <span style="font-size: 0.8rem; color: #6ee7b7; font-weight: 600;">₹150 Flat Discount</span>
+          </div>
+          <div id="promo-offer-text" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.4rem; margin-bottom: 0.6rem;">
+            Use coupon <strong style="color: var(--primary); cursor: pointer; text-decoration: underline;" onclick="document.getElementById('coupon-code-input').value='WELCOME150'" title="Click to fill">WELCOME150</strong> and click <strong>Apply</strong> to get ₹150 OFF your tickets!
+          </div>
+          <div class="coupon-input-group">
+            <input type="text" id="coupon-code-input" placeholder="ENTER COUPON (e.g. WELCOME150)" value="">
+            <button type="button" id="apply-coupon-btn" class="btn btn-primary btn-sm" onclick="applyCouponCode()">Apply</button>
+          </div>
+          <div id="coupon-feedback" style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem; display: none;"></div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; margin-top: 0.5rem;">
+          <div class="price-line">
+            <span>Ticket Subtotal:</span>
+            <span id="chk-base-price">₹0.00</span>
+          </div>
+          <div class="price-line" id="discount-line" style="display: none; color: #6ee7b7;">
+            <span>Coupon Discount (WELCOME150):</span>
+            <span id="chk-discount">-₹150.00</span>
+          </div>
+          <div class="price-line">
+            <span>Convenience Fee (5%):</span>
+            <span id="chk-fee">₹0.00</span>
+          </div>
+          <div class="price-line">
+            <span>GST / Taxes (18%):</span>
+            <span id="chk-tax">₹0.00</span>
+          </div>
+          <div class="price-line total">
+            <span>Grand Total:</span>
+            <span style="color: var(--primary);" id="chk-total">₹0.00</span>
+          </div>
+        </div>
+
+        <button id="confirm-pay-btn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+          💳 Pay & Confirm Booking
+        </button>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let checkoutData = null;
+    let selectedMethod = 'UPI';
+    let appliedCoupon = null;
+    let discountVal = 0;
+    let couponAlreadyUsed = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const stored = sessionStorage.getItem('cinereserve_checkout');
+      if (!stored) {
+        showToast('No active booking session found. Redirecting to home...', 'error');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+        return;
+      }
+
+      checkoutData = JSON.parse(stored);
+      await checkCouponEligibility();
+      startTimer();
+      setupPaymentTrigger();
+
+      const codeInput = document.getElementById('coupon-code-input');
+      if (codeInput) {
+        codeInput.addEventListener('input', () => {
+          const applyBtn = document.getElementById('apply-coupon-btn');
+          if (applyBtn && applyBtn.innerText !== 'Apply') {
+            applyBtn.innerText = 'Apply';
+            applyBtn.className = 'btn btn-primary btn-sm';
+          }
+        });
+        codeInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            applyCouponCode();
+          }
+        });
+      }
+    });
+
+    async function checkCouponEligibility() {
+      try {
+        if (typeof API !== 'undefined' && API.getToken()) {
+          const res = await API.getMyBookings();
+          if (res && res.data) {
+            couponAlreadyUsed = res.data.some(b => 
+              b.status === 'CONFIRMED' && 
+              b.couponCode && 
+              ['WELCOME150', 'FIRST150', 'CINERESERVE150'].includes(b.couponCode.toUpperCase())
+            );
+          }
+        }
+      } catch (e) {
+        console.warn('Could not verify coupon history:', e);
+      }
+
+      const input = document.getElementById('coupon-code-input');
+      const promoNotice = document.getElementById('promo-offer-text');
+
+      if (couponAlreadyUsed) {
+        if (input) {
+          input.value = '';
+          input.placeholder = 'ENTER PROMO CODE';
+        }
+        if (promoNotice) {
+          promoNotice.innerHTML = `⭐ <strong>First-time OFFER Claimed:</strong> Promo code WELCOME150 has already been used on your account for a previous booking.`;
+        }
+      }
+
+      // Do NOT auto-apply: wait for user to enter code and click Apply
+      appliedCoupon = null;
+      discountVal = 0;
+      renderCheckoutSummary();
+    }
+
+    function applyCouponCode() {
+      const codeInput = document.getElementById('coupon-code-input');
+      const code = (codeInput ? codeInput.value : '').trim().toUpperCase();
+      const feedback = document.getElementById('coupon-feedback');
+      const applyBtn = document.getElementById('apply-coupon-btn');
+
+      if (!code) {
+        appliedCoupon = null;
+        discountVal = 0;
+        feedback.style.display = 'block';
+        feedback.style.color = '#fb7185';
+        feedback.innerText = 'Please enter a coupon code before clicking Apply.';
+        if (applyBtn) {
+          applyBtn.innerText = 'Apply';
+          applyBtn.className = 'btn btn-primary btn-sm';
+        }
+        renderCheckoutSummary();
+        return;
+      }
+
+      if (code === 'WELCOME150' || code === 'FIRST150' || code === 'CINERESERVE150') {
+        if (couponAlreadyUsed) {
+          appliedCoupon = null;
+          discountVal = 0;
+          feedback.style.display = 'block';
+          feedback.style.color = '#fb7185';
+          feedback.innerText = `✗ Promo code "${code}" has already been used on your account for a previous booking.`;
+          if (applyBtn) {
+            applyBtn.innerText = 'Apply';
+            applyBtn.className = 'btn btn-primary btn-sm';
+          }
+        } else {
+          appliedCoupon = code;
+          discountVal = 150.0;
+          feedback.style.display = 'block';
+          feedback.style.color = '#6ee7b7';
+          feedback.innerText = `✓ Offer applied! ₹150 discount granted with code "${code}".`;
+          if (applyBtn) {
+            applyBtn.innerText = 'Applied ✓';
+            applyBtn.className = 'btn btn-outline btn-sm';
+          }
+          if (typeof showToast === 'function') {
+            showToast('🎉 ₹150 offer discount applied to your booking!');
+          }
+        }
+      } else {
+        appliedCoupon = null;
+        discountVal = 0;
+        feedback.style.display = 'block';
+        feedback.style.color = '#fb7185';
+        feedback.innerText = `✗ Invalid coupon code "${code}". Try WELCOME150`;
+        if (applyBtn) {
+          applyBtn.innerText = 'Apply';
+          applyBtn.className = 'btn btn-primary btn-sm';
+        }
+      }
+      renderCheckoutSummary();
+    }
+
+    function renderCheckoutSummary() {
+      document.getElementById('chk-movie-title').innerText = checkoutData.movieTitle;
+      const is18 = checkoutData.isAgeRestricted || checkoutData.censorRating === 'A' || checkoutData.ageRestriction === '18+';
+      if (is18) {
+        document.getElementById('chk-movie-title').innerHTML = `${checkoutData.movieTitle} <span class="age-badge-18" style="vertical-align: middle; margin-left: 6px;">18+</span>`;
+      }
+
+      let chkDate = null;
+      if (Array.isArray(checkoutData.startTime) && checkoutData.startTime.length >= 3) {
+        const [y, m, day, h = 0, min = 0] = checkoutData.startTime;
+        chkDate = new Date(y, m - 1, day, h, min);
+      } else if (checkoutData.startTime) {
+        chkDate = new Date(checkoutData.startTime);
+      }
+      const timeStr = (chkDate && !isNaN(chkDate.getTime()))
+        ? chkDate.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+        : 'Showtime';
+      document.getElementById('chk-hall-info').innerText = `${checkoutData.theatreName} • ${checkoutData.screenName} • ${timeStr}`;
+
+      if (is18 && !document.getElementById('notice-inserted')) {
+        const noticeEl = document.createElement('div');
+        noticeEl.id = 'notice-inserted';
+        noticeEl.className = 'theatre-notice-box';
+        noticeEl.style.marginBottom = '1.5rem';
+        noticeEl.innerHTML = `<span>🔞</span><span><strong>Age Notice:</strong> Valid government-issued age proof may be checked at the theatre entrance.</span>`;
+        const paymentSection = document.querySelector('.checkout-grid > section');
+        if (paymentSection) {
+          paymentSection.insertBefore(noticeEl, paymentSection.firstChild);
+        }
+      }
+
+      const chipsContainer = document.getElementById('chk-seat-chips');
+      chipsContainer.innerHTML = '';
+      let subTotal = 0;
+
+      checkoutData.seats.forEach(seat => {
+        subTotal += parseFloat(seat.price);
+        const chip = document.createElement('span');
+        chip.className = 'seat-chip';
+        chip.innerText = `${seat.seatCode} (₹${seat.price})`;
+        chipsContainer.appendChild(chip);
+      });
+
+      if (is18 && checkoutData.ageProofType) {
+        const verTag = document.createElement('div');
+        verTag.style.cssText = 'font-size: 0.8rem; color: #6ee7b7; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.4rem 0.6rem; border-radius: 4px; margin-top: 0.75rem;';
+        verTag.innerText = `✓ Age Verified (Proof: ${checkoutData.ageProofType})`;
+        chipsContainer.appendChild(verTag);
+      }
+
+      const actualDiscount = Math.min(discountVal, subTotal);
+      const discountedBase = Math.max(0, subTotal - actualDiscount);
+      const convenienceFee = discountedBase * 0.05;
+      const tax = discountedBase * 0.18;
+      const total = discountedBase + convenienceFee + tax;
+
+      document.getElementById('chk-base-price').innerText = `₹${subTotal.toFixed(2)}`;
+      
+      const discountLine = document.getElementById('discount-line');
+      if (actualDiscount > 0) {
+        discountLine.style.display = 'flex';
+        discountLine.querySelector('span:first-child').innerText = `Coupon Discount (${appliedCoupon}):`;
+        document.getElementById('chk-discount').innerText = `-₹${actualDiscount.toFixed(2)}`;
+      } else {
+        discountLine.style.display = 'none';
+      }
+
+      document.getElementById('chk-fee').innerText = `₹${convenienceFee.toFixed(2)}`;
+      document.getElementById('chk-tax').innerText = `₹${tax.toFixed(2)}`;
+      document.getElementById('chk-total').innerText = `₹${total.toFixed(2)}`;
+    }
+
+    function selectPaymentMethod(method, element) {
+      selectedMethod = method;
+      document.querySelectorAll('.payment-option-card').forEach(c => c.classList.remove('selected'));
+      element.classList.add('selected');
+
+      const title = document.getElementById('pay-detail-title');
+      const addressLabel = document.getElementById('pay-address-label');
+      const addressInput = document.getElementById('pay-address');
+      const pinGroup = document.getElementById('pay-pin-group');
+      const pinLabel = document.getElementById('pay-pin-label');
+      const pinInput = document.getElementById('pay-pin');
+
+      if (method === 'UPI') {
+        title.innerText = 'UPI Details';
+        addressLabel.innerText = 'UPI ID';
+        addressInput.placeholder = 'user@upi';
+        addressInput.value = 'user@upi';
+        pinGroup.style.display = 'none';
+      } else if (method === 'CREDIT_CARD') {
+        title.innerText = 'Card Details';
+        addressLabel.innerText = 'Card Number';
+        addressInput.placeholder = '16 Digit Card Number';
+        addressInput.value = '4532015099881234';
+        pinGroup.style.display = 'block';
+        pinLabel.innerText = 'CVV';
+        pinInput.placeholder = '123';
+        pinInput.value = '888';
+      } else if (method === 'NET_BANKING') {
+        title.innerText = 'Net Banking Details';
+        addressLabel.innerText = 'Bank Name';
+        addressInput.placeholder = 'Enter Bank Name';
+        addressInput.value = 'HDFC Bank';
+        pinGroup.style.display = 'block';
+        pinLabel.innerText = 'Password';
+        pinInput.placeholder = 'Secret Password';
+        pinInput.value = 'sandbox123';
+      } else if (method === 'WALLET') {
+        title.innerText = 'Digital Wallet Details';
+        addressLabel.innerText = 'Mobile Number';
+        addressInput.placeholder = '10 Digit Mobile Number';
+        addressInput.value = '9876543210';
+        pinGroup.style.display = 'block';
+        pinLabel.innerText = 'Wallet PIN';
+        pinInput.placeholder = '4 Digit PIN';
+        pinInput.value = '1234';
+      }
+    }
+
+    function setupPaymentTrigger() {
+      const payBtn = document.getElementById('confirm-pay-btn');
+      payBtn.onclick = async () => {
+        try {
+          payBtn.disabled = true;
+          payBtn.innerText = 'Processing Transaction...';
+
+          let address = (document.getElementById('pay-address')?.value || '').trim();
+          let pin = (document.getElementById('pay-pin')?.value || '').trim();
+
+          // Provide sandbox fallbacks if user cleared or left fields blank
+          if (!address) {
+            if (selectedMethod === 'UPI') address = 'user@upi';
+            else if (selectedMethod === 'CREDIT_CARD') address = '4532015099881234';
+            else if (selectedMethod === 'NET_BANKING') address = 'HDFC Bank';
+            else if (selectedMethod === 'WALLET') address = '9876543210';
+            else address = 'user@upi';
+          }
+          if (!pin) {
+            if (selectedMethod === 'CREDIT_CARD') pin = '888';
+            else if (selectedMethod === 'NET_BANKING') pin = 'sandbox123';
+            else pin = '1234';
+          }
+
+          const res = await API.createBooking(
+            checkoutData.showId,
+            checkoutData.seatIds,
+            selectedMethod,
+            checkoutData.dateOfBirth,
+            checkoutData.ageProofType,
+            appliedCoupon,
+            address,
+            pin
+          );
+
+          showToast('Payment successful! Generating your e-ticket...');
+          sessionStorage.removeItem('cinereserve_checkout');
+
+          setTimeout(() => {
+            window.location.href = `ticket.html?bookingNumber=${res.data.bookingNumber}`;
+          }, 1000);
+        } catch (err) {
+          showToast(err.message || 'Booking transaction failed', 'error');
+          payBtn.disabled = false;
+          payBtn.innerText = '💳 Pay & Confirm Booking';
+        }
+      };
+    }
+
+    function startTimer() {
+      let duration = 600; // 10 minutes in seconds
+      const timerDisplay = document.getElementById('checkout-timer');
+
+      const interval = setInterval(() => {
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (--duration < 0) {
+          clearInterval(interval);
+          alert('Your booking session has expired. Please select your seats again.');
+          window.location.href = 'index.html';
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

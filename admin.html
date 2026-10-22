@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinema Admin Portal – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span> <span style="font-size: 0.8rem; color: var(--accent-purple); font-weight: 700; background: rgba(139,92,246,0.15); padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid rgba(139,92,246,0.3);">ADMIN</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">← Client Portal</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">📊 Cinema Management Dashboard</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Real-time box office analytics, show scheduling, and catalogue operations</p>
+      </div>
+    </div>
+
+    <!-- Analytics Metrics Grid -->
+    <div class="admin-grid" id="admin-metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-box green">💰</div>
+        <div>
+          <div class="metric-value" id="m-revenue">₹0.00</div>
+          <div class="metric-label">Total Box Office Revenue</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box gold">🎟️</div>
+        <div>
+          <div class="metric-value" id="m-bookings">0</div>
+          <div class="metric-label">Confirmed Bookings</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box cyan">🕒</div>
+        <div>
+          <div class="metric-value" id="m-shows">0</div>
+          <div class="metric-label">Scheduled Shows</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box purple">🎞️</div>
+        <div>
+          <div class="metric-value" id="m-movies">0</div>
+          <div class="metric-label">Active Movies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operations Section (2 Columns: Add Movie & Schedule Show) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+      
+      <!-- Add Movie Card -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.75rem; backdrop-filter: blur(8px);">
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.25rem;">🎬 Add Movie to Catalog</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Register a new theatrical release</p>
+
+        <form id="add-movie-form">
+          <div class="form-group">
+            <label class="form-label">Movie Title</label>
+            <input type="text" id="m-title" class="form-control" required placeholder="e.g. Avatar: The Way of Water">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Genre</label>
+              <input type="text" id="m-genre" class="form-control" required placeholder="Sci-Fi / Action">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Language</label>
+              <input type="text" id="m-lang" class="form-control" required placeholder="English / Hindi">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Duration (Minutes)</label>
+              <input type="number" id="m-dur" class="form-control" required placeholder="150" min="30">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Censor Rating</label>
+              <select id="m-censor" class="form-control">
+                <option value="U">U</option>
+                <option value="U/A" selected>U/A</option>
+                <option value="A">A</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Poster Image URL</label>
+            <input type="url" id="m-poster" class="form-control" placeholder="https://images.unsplash.com/...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Synopsis</label>
+            <textarea id="m-desc" class="form-control" rows="2" placeholder="Brief movie description..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Add Movie to Catalog</button>
+        </form>
+      </div>
+
+      <!-- Schedule Show Card -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.75rem; backdrop-filter: blur(8px);">
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.25rem;">🕒 Schedule Show Screening</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Link movie to a cinema screen with seat matrix</p>
+
+        <form id="schedule-show-form">
+          <div class="form-group">
+            <label class="form-label">Select Movie</label>
+            <select id="sch-movie" class="form-control" required>
+              <option value="">-- Choose Movie --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select Screen / Auditorium</label>
+            <select id="sch-screen" class="form-control" required>
+              <option value="1">Screen 1 (Dolby Atmos 4K) - CineReserve Grand</option>
+              <option value="2">Screen 2 (3D Gold Class) - CineReserve Grand</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Show Start Date & Time</label>
+            <input type="datetime-local" id="sch-time" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Base Ticket Price (₹)</label>
+            <input type="number" id="sch-price" class="form-control" required value="200" min="50" step="10">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+            Schedule Show & Allocate Seats
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Booking Audit Trail -->
+    <div class="section-header">
+      <h2 class="section-title">📑 Transaction & Booking Audit Logs</h2>
+    </div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Booking ID</th>
+            <th>Customer</th>
+            <th>Movie</th>
+            <th>Showtime</th>
+            <th>Amount Paid</th>
+            <th>Status</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody id="admin-bookings-table-body">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading booking audit logs...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = API.getUser();
+      if (!user || user.role !== 'ROLE_ADMIN') {
+        alert('Access Denied: Administrator credentials required.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      await loadDashboardMetrics();
+      await loadMoviesDropdown();
+      await loadBookingLogs();
+      setupAdminForms();
+    });
+
+    async function loadDashboardMetrics() {
+      try {
+        const res = await API.getAdminMetrics();
+        const m = res.data;
+        document.getElementById('m-revenue').innerText = `₹${m.totalRevenue || '0.00'}`;
+        document.getElementById('m-bookings').innerText = m.totalBookings || 0;
+        document.getElementById('m-shows').innerText = m.totalShows || 0;
+        document.getElementById('m-movies').innerText = m.totalMovies || 0;
+      } catch (err) {
+        console.error('Metrics loading failed', err);
+      }
+    }
+
+    async function loadMoviesDropdown() {
+      try {
+        const res = await API.getNowShowing();
+        const select = document.getElementById('sch-movie');
+        select.innerHTML = '<option value="">-- Choose Movie --</option>';
+        (res.data || []).forEach(m => {
+          select.innerHTML += `<option value="${m.id}">${m.title} (${m.language})</option>`;
+        });
+      } catch (e) {
+        console.error('Failed to load movies for dropdown', e);
+      }
+    }
+
+    async function loadBookingLogs() {
+      const tbody = document.getElementById('admin-bookings-table-body');
+      try {
+        const res = await API.getAllBookings();
+        const bookings = res.data || [];
+
+        if (!bookings.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No booking transactions recorded.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = bookings.map(b => {
+          const isConfirmed = b.status === 'CONFIRMED';
+          let bDate = null;
+          if (Array.isArray(b.bookingTime) && b.bookingTime.length >= 3) {
+            const [y, m, day, h = 0, min = 0] = b.bookingTime;
+            bDate = new Date(y, m - 1, day, h, min);
+          } else if (b.bookingTime) {
+            bDate = new Date(b.bookingTime);
+          }
+          const time = (bDate && !isNaN(bDate.getTime()))
+            ? bDate.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+            : 'N/A';
+
+          let sDate = null;
+          if (b.show && b.show.startTime) {
+            if (Array.isArray(b.show.startTime) && b.show.startTime.length >= 3) {
+              const [y, m, day, h = 0, min = 0] = b.show.startTime;
+              sDate = new Date(y, m - 1, day, h, min);
+            } else {
+              sDate = new Date(b.show.startTime);
+            }
+          }
+          const showTimeStr = (sDate && !isNaN(sDate.getTime()))
+            ? sDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+            : 'N/A';
+
+          return `
+            <tr>
+              <td><code>${b.bookingNumber}</code></td>
+              <td>${b.user ? b.user.fullName : 'Guest'}</td>
+              <td>${b.show && b.show.movie ? b.show.movie.title : 'N/A'}</td>
+              <td>${showTimeStr}</td>
+              <td style="font-weight: 700; color: var(--accent-green);">₹${b.totalAmount}</td>
+              <td><span class="badge ${isConfirmed ? 'badge-success' : 'badge-danger'}">${b.status}</span></td>
+              <td style="color: var(--text-muted); font-size: 0.85rem;">${time}</td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #fb7185; padding: 2rem;">Failed to load logs.</td></tr>`;
+      }
+    }
+
+    function setupAdminForms() {
+      // Add Movie Form
+      const movieForm = document.getElementById('add-movie-form');
+      movieForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const moviePayload = {
+          title: document.getElementById('m-title').value,
+          genre: document.getElementById('m-genre').value,
+          language: document.getElementById('m-lang').value,
+          durationMinutes: parseInt(document.getElementById('m-dur').value),
+          censorRating: document.getElementById('m-censor').value,
+          posterUrl: document.getElementById('m-poster').value || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80',
+          description: document.getElementById('m-desc').value,
+          status: 'NOW_SHOWING'
+        };
+
+        try {
+          await API.addMovie(moviePayload);
+          showToast('Movie successfully added to catalog!');
+          movieForm.reset();
+          await loadDashboardMetrics();
+          await loadMoviesDropdown();
+        } catch (err) {
+          showToast(err.message || 'Failed to add movie', 'error');
+        }
+      };
+
+      // Schedule Show Form
+      const showForm = document.getElementById('schedule-show-form');
+      showForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const showPayload = {
+          movieId: parseInt(document.getElementById('sch-movie').value),
+          screenId: parseInt(document.getElementById('sch-screen').value),
+          startTime: document.getElementById('sch-time').value,
+          basePrice: parseFloat(document.getElementById('sch-price').value)
+        };
+
+        try {
+          await API.scheduleShow(showPayload);
+          showToast('Show screening successfully scheduled with seat matrix!');
+          showForm.reset();
+          await loadDashboardMetrics();
+        } catch (err) {
+          showToast(err.message || 'Failed to schedule show', 'error');
+        }
+      };
+    }
+  </script>
+</body>
+</html>

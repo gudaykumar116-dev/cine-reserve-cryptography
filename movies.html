@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Movies & Shows – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="movies.html" class="nav-link active">Movies</a></li>
+      <li><a href="history.html" class="nav-link">My Bookings</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="container">
+    <!-- Welcome Signup Offer Banner -->
+    <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%); border: 1px dashed rgba(245, 158, 11, 0.5); border-radius: var(--radius-md); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.8rem;">🎁</span>
+        <div>
+          <div style="font-weight: 700; color: #fff; font-size: 1.05rem;">New User Welcome Offer: Flat ₹150 OFF!</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">Use coupon promo code <strong style="color: var(--primary);">WELCOME150</strong> during checkout to save ₹150 on your ticket booking.</div>
+        </div>
+      </div>
+      <span class="coupon-badge" style="font-size: 0.85rem; padding: 0.4rem 0.9rem;">CODE: WELCOME150</span>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">🍿 Explore Cinema Catalogue</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Browse 15+ blockbusters across Telugu, English, Hindi with top multiplex screenings</p>
+      </div>
+
+      <div class="search-filter-bar">
+        <input type="text" id="cat-search" class="search-input" placeholder="Search title, cast, hero, director...">
+        <select id="cat-status" class="select-input">
+          <option value="NOW_SHOWING">Now Showing</option>
+          <option value="COMING_SOON">Coming Soon</option>
+        </select>
+        <select id="cat-genre" class="select-input">
+          <option value="">All Genres</option>
+        </select>
+        <select id="cat-lang" class="select-input">
+          <option value="">All Languages</option>
+          <option value="Telugu">Telugu (5 Movies)</option>
+          <option value="English">English (5 Movies)</option>
+          <option value="Hindi">Hindi (5 Movies)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Quick Language Tabs -->
+    <div class="city-filters" style="margin-bottom: 1.5rem;">
+      <div class="city-chip active" onclick="filterByLangQuick('')">🌐 All Languages</div>
+      <div class="city-chip" onclick="filterByLangQuick('Telugu')">🔥 Telugu (Tollywood Blockbusters)</div>
+      <div class="city-chip" onclick="filterByLangQuick('English')">🎬 English (Hollywood Hits)</div>
+      <div class="city-chip" onclick="filterByLangQuick('Hindi')">✨ Hindi (Bollywood Hits)</div>
+    </div>
+
+    <!-- Movie Grid -->
+    <div class="movie-grid" id="catalog-grid">
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading cinema catalog...
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><strong>CineReserve</strong> – Online Movie Ticket Booking System &copy; 2026.</p>
+    <p class="footer-dev">Developed by <span>UDAYKUMARGOURIDEVI</span></p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/trailer.js"></script>
+  <script>
+    let catalogMovies = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadFilters();
+      await fetchMovies();
+      setupFilters();
+    });
+
+    async function loadFilters() {
+      try {
+        const [genres, langs] = await Promise.all([API.getGenres(), API.getLanguages()]);
+        const gSelect = document.getElementById('cat-genre');
+        (genres.data || []).forEach(g => gSelect.innerHTML += `<option value="${g}">${g}</option>`);
+
+        const lSelect = document.getElementById('cat-lang');
+        (langs.data || []).forEach(l => lSelect.innerHTML += `<option value="${l}">${l}</option>`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function fetchMovies() {
+      const status = document.getElementById('cat-status').value;
+      const query = document.getElementById('cat-search').value;
+
+      try {
+        const res = await API.searchMovies(query, status);
+        catalogMovies = res.data || [];
+        renderMovies(catalogMovies, status === 'COMING_SOON');
+      } catch (err) {
+        document.getElementById('catalog-grid').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #fb7185;">
+            Failed to connect to backend server.
+          </div>
+        `;
+      }
+    }
+
+    function renderMovies(movies, isComingSoon) {
+      const container = document.getElementById('catalog-grid');
+      if (!movies.length) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">No movies match the specified criteria.</div>`;
+        return;
+      }
+
+      container.innerHTML = movies.map(m => {
+        const is18 = m.ageRestricted || m.censorRating === 'A' || m.ageRestriction === '18+';
+        const censorLabel = is18 ? '18+' : (m.censorRating || 'U/A');
+        const censorClass = is18 ? 'movie-censor-badge age-badge-18' : 'movie-censor-badge';
+        const posterSrc = getPosterForMovie(m);
+        const trailerSrc = getTrailerForMovie(m);
+        const safeTitle = encodeURIComponent(m.title);
+
+        return `
+        <div class="movie-card">
+          <div class="movie-poster-wrap" onclick="openTrailerDirectly('${trailerSrc}', '${safeTitle}')" title="Click to watch ${m.title} trailer">
+            <img src="${posterSrc}" alt="${m.title}" class="movie-poster" loading="lazy" onerror="this.onerror=null;this.src='images/rrr.jpg';">
+            <span class="${censorClass}">${censorLabel}</span>
+            <div class="poster-play-overlay">
+              <div class="play-circle-icon">▶</div>
+            </div>
+          </div>
+          <div class="movie-info">
+            <div class="movie-genre">${m.genre}</div>
+            <h3 class="movie-title" title="${m.title}">${m.title}</h3>
+            <div class="movie-meta">
+              <span>⏱ ${m.durationMinutes}m</span>
+              <span>•</span>
+              <span>🗣 ${m.language}</span>
+            </div>
+            <div class="movie-card-footer" style="display: flex; gap: 0.5rem; align-items: center;">
+              ${isComingSoon ? 
+                `<a href="${trailerSrc}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">▶ Watch Trailer</a>` :
+                `<a href="movie-details.html?id=${m.id}" class="btn btn-primary btn-sm" style="flex: 1.2;">🎟️ Showtimes</a>
+                 <a href="${trailerSrc}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" title="Watch trailer">▶ Trailer</a>`
+              }
+            </div>
+          </div>
+        </div>
+      `;}).join('');
+    }
+
+    function filterByLangQuick(lang) {
+      document.getElementById('cat-lang').value = lang;
+      document.querySelectorAll('.city-filters .city-chip').forEach(c => {
+        if ((!lang && c.innerText.includes('All Languages')) || (lang && c.innerText.includes(lang))) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+      document.getElementById('cat-lang').dispatchEvent(new Event('change'));
+    }
+
+    function setupFilters() {
+      const searchInput = document.getElementById('cat-search');
+      const statusSelect = document.getElementById('cat-status');
+      const genreSelect = document.getElementById('cat-genre');
+      const langSelect = document.getElementById('cat-lang');
+
+      const handleFilterChange = () => {
+        const query = searchInput.value.toLowerCase().trim();
+        const selectedGenre = genreSelect.value;
+        const selectedLang = langSelect.value;
+        const isComingSoon = statusSelect.value === 'COMING_SOON';
+
+        const filtered = catalogMovies.filter(m => {
+          const matchQuery = !query || 
+            m.title.toLowerCase().includes(query) || 
+            m.genre.toLowerCase().includes(query) ||
+            (m.hero && m.hero.toLowerCase().includes(query)) ||
+            (m.director && m.director.toLowerCase().includes(query)) ||
+            (m.cast && m.cast.toLowerCase().includes(query));
+          const matchGenre = !selectedGenre || m.genre.includes(selectedGenre);
+          const matchLang = !selectedLang || m.language.toLowerCase() === selectedLang.toLowerCase();
+          return matchQuery && matchGenre && matchLang;
+        });
+
+        renderMovies(filtered, isComingSoon);
+      };
+
+      searchInput.addEventListener('input', handleFilterChange);
+      statusSelect.addEventListener('change', async () => {
+        await fetchMovies();
+        handleFilterChange();
+      });
+      genreSelect.addEventListener('change', handleFilterChange);
+      langSelect.addEventListener('change', handleFilterChange);
+    }
+  </script>
+</body>
+</html>

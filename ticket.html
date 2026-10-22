@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M-Ticket – CineReserve</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background-color: var(--bg-primary); /* Keep standard dark background for the page */
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .m-ticket-wrapper {
+      max-width: 420px;
+      margin: 3rem auto;
+      width: 100%;
+      padding: 0 1rem;
+    }
+
+    .m-ticket {
+      background: #ffffff;
+      border-radius: 24px;
+      color: #1a1a1a;
+      font-family: 'Inter', system-ui, sans-serif;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Section */
+    .mt-top {
+      padding: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .mt-poster-wrap {
+      position: relative;
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .mt-poster {
+      width: 100px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .mt-trailer-btn {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e50914;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.35rem 0.6rem;
+      border-radius: 99px;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(229,9,20,0.4);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .mt-trailer-btn:hover { background: #ff0f1a; color: #fff; }
+
+    .mt-info {
+      flex: 1;
+      padding-top: 0.25rem;
+    }
+
+    .mt-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      color: #000;
+    }
+
+    .mt-text-grey {
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .mt-badge {
+      position: absolute;
+      right: -25px;
+      top: 50px;
+      transform: rotate(90deg);
+      font-size: 0.7rem;
+      color: #888;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* Center Section (Seats, QR) */
+    .mt-center {
+      padding: 1rem 1.5rem 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .mt-pill {
+      background: #f1f3f5;
+      color: #495057;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 99px;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+
+    .mt-screen {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #000;
+      margin: 0.25rem 0;
+    }
+
+    .mt-seats {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 1.5rem;
+    }
+
+    .mt-qr-wrap {
+      background: #fff;
+      padding: 10px;
+      display: inline-block;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .mt-booking-id {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #000;
+      letter-spacing: 1px;
+    }
+
+    .mt-notice {
+      background: #f8f9fa;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #6c757d;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Dotted Line with cutouts */
+    .mt-divider {
+      position: relative;
+      border-top: 2px dashed #dee2e6;
+      margin: 1.5rem 0;
+    }
+    .mt-divider::before, .mt-divider::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      width: 20px;
+      height: 20px;
+      background-color: var(--bg-primary); /* Matches body background */
+      border-radius: 50%;
+    }
+    .mt-divider::before { left: -10px; }
+    .mt-divider::after { right: -10px; }
+
+    /* Bottom Pricing */
+    .mt-pricing {
+      padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .price-row.total {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 1rem;
+    }
+    
+    .contact-support {
+      text-align: center;
+      margin-top: 1rem;
+      margin-bottom: -1rem;
+    }
+
+    @media print {
+      body { background: #fff !important; }
+      .navbar, .footer, .no-print, .mt-divider::before, .mt-divider::after { display: none !important; }
+      .m-ticket { box-shadow: none; border: 2px solid #ccc; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar no-print">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🎬</div>
+      <span>Cine<span style="color: var(--primary);">Reserve</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="history.html" class="nav-link">My Bookings</a></li>
+    </ul>
+    <div id="navbar-auth-section" class="nav-auth"></div>
+  </nav>
+
+  <main class="m-ticket-wrapper">
+    <div style="text-align: center; margin-bottom: 1rem; color: #fff; display: flex; justify-content: space-between; align-items: center;" class="no-print">
+      <span style="font-weight: 600; font-size: 1.2rem;">Your Ticket</span>
+      <button onclick="window.print()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;">🖨️</button>
+    </div>
+
+    <div class="m-ticket" id="ticket-card">
+      
+      <!-- Top Movie Section -->
+      <div class="mt-top">
+        <div class="mt-poster-wrap">
+          <img id="tkt-poster" src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80" alt="Poster" class="mt-poster">
+          <a id="tkt-trailer-btn" href="#" target="_blank" class="mt-trailer-btn" style="display: none;">▶ Watch Trailer</a>
+        </div>
+        
+        <div class="mt-info">
+          <div class="mt-title" id="tkt-movie-title">Loading...</div>
+          <div class="mt-text-grey">English, 2D <span id="tkt-censor" style="font-size:0.75rem; border:1px solid #ccc; padding:1px 4px; border-radius:3px; margin-left:4px;">U/A</span></div>
+          <div class="mt-text-grey" id="tkt-showtime" style="font-weight: 600; color: #111;">--</div>
+          <div class="mt-text-grey" id="tkt-booking-time" style="font-size: 0.78rem; color: #666; margin-top: 2px;">--</div>
+          <div class="mt-text-grey" id="tkt-theatre-name">Cinema Complex</div>
+        </div>
+        
+        <div class="mt-badge">M-Ticket</div>
+      </div>
+
+      <!-- Divider -->
+      <div class="mt-divider"></div>
+
+      <!-- Center QR and Seats -->
+      <div class="mt-center">
+        <div class="mt-pill">Tap to hide details</div>
+        
+        <div class="mt-text-grey" id="tkt-ticket-count">-- Ticket(s)</div>
+        <div class="mt-screen" id="tkt-screen-name">SCREEN --</div>
+        <div class="mt-seats" id="tkt-seats">--</div>
+
+        <div class="mt-qr-wrap">
+          <img id="tkt-qr-code" src="" alt="QR Code" style="width: 130px; height: 130px; display: block;">
+        </div>
+
+        <div class="mt-booking-id" id="tkt-booking-number">BOOKING ID: ------</div>
+        
+        <!-- Cryptography Security Section -->
+        <div style="margin-top: 15px; padding: 10px; background: #eef2f5; border-radius: 8px; text-align: left; font-size: 0.85rem; border-left: 4px solid #0056b3;">
+          <div style="font-weight: 700; color: #0056b3; margin-bottom: 5px;">Security Verification</div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+            <span>Integrity (SHA-256):</span>
+            <span id="tkt-hash-status" style="font-weight: 600; color: #666;">Verifying...</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Authenticity (RSA):</span>
+            <span id="tkt-sig-status" style="font-weight: 600; color: #666;">Verifying...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notice -->
+      <div class="mt-notice">
+        Cancellation unavailable : cut-off time of 20 minutes before showtime has passed
+        <div class="contact-support">📞<br>Contact support</div>
+      </div>
+
+      <!-- Divider -->
+      <div class="mt-divider" style="margin-bottom: 1.5rem; margin-top: 1rem;"></div>
+
+      <!-- Pricing -->
+      <div class="mt-pricing">
+        <div class="price-row total">
+          <span>Total Amount</span>
+          <span id="tkt-total">₹0.00</span>
+        </div>
+        <div class="price-row">
+          <span id="tkt-price-label">Ticket(s) price</span>
+          <span id="tkt-base-amt">₹0.00</span>
+        </div>
+        <div class="price-row">
+          <span>Convenience fee</span>
+          <span id="tkt-conv-fee">₹0.00</span>
+        </div>
+        <div class="price-row">
+          <span>Discount</span>
+          <span id="tkt-discount">- ₹0.00</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingNumber = urlParams.get('bookingNumber');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!bookingNumber) {
+        showToast('No booking reference provided', 'error');
+        return;
+      }
+      await loadTicketData();
+    });
+
+    async function loadTicketData() {
+      try {
+        const res = await API.getBookingByNumber(bookingNumber);
+        const b = res.data;
+
+        // Set Texts
+        document.getElementById('tkt-movie-title').innerText = b.movieTitle || 'Movie Title';
+        const is18 = b.ageRestricted || b.censorRating === 'A' || b.ageRestriction === '18+';
+        document.getElementById('tkt-censor').innerText = is18 ? '18+ (A)' : (b.censorRating || 'U/A');
+        
+        document.getElementById('tkt-theatre-name').innerText = b.theatreName || 'Cinema';
+        document.getElementById('tkt-screen-name').innerText = (b.screenName || 'SCREEN 1').toUpperCase();
+        document.getElementById('tkt-booking-number').innerText = `BOOKING ID: ${b.bookingNumber || '------'}`;
+        
+        const seatArr = b.seatNumbers || [];
+        document.getElementById('tkt-ticket-count').innerText = `${seatArr.length} Ticket(s)`;
+        document.getElementById('tkt-seats').innerText = seatArr.length > 0 ? seatArr.join(', ') : 'N/A';
+        document.getElementById('tkt-price-label').innerText = `Ticket(s) price (${seatArr.length})`;
+        
+        // Set Pricing
+        document.getElementById('tkt-total').innerText = `₹${(b.totalAmount || 0).toFixed(2)}`;
+        document.getElementById('tkt-base-amt').innerText = `₹${(b.baseAmount || 0).toFixed(2)}`;
+        document.getElementById('tkt-conv-fee').innerText = `₹${((b.taxAmount || 0) + (b.convenienceFee || 0)).toFixed(2)}`;
+        document.getElementById('tkt-discount').innerText = `- ₹${(b.discountAmount || 0).toFixed(2)}`;
+
+        // Set Images
+        document.getElementById('tkt-qr-code').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(b.bookingNumber || '0');
+        
+        let posterSrc = b.moviePosterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80';
+        if(posterSrc.startsWith('/images/')) {
+            posterSrc = 'http://localhost:8080' + posterSrc; // Absolute URL for print/cache
+        }
+        document.getElementById('tkt-poster').src = posterSrc;
+
+        // Format Date
+        let showDate = null;
+        if (Array.isArray(b.showStartTime) && b.showStartTime.length >= 3) {
+            const [y, m, d, h = 0, min = 0] = b.showStartTime;
+            showDate = new Date(y, m - 1, d, h, min);
+        } else if (b.showStartTime) {
+            showDate = new Date(b.showStartTime);
+        }
+
+        if (showDate && !isNaN(showDate.getTime())) {
+            const dateFormatted = showDate.toLocaleString('en-US', {
+              weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+            });
+            const timeFormatted = showDate.toLocaleString('en-US', {
+              hour: '2-digit', minute: '2-digit', hour12: true
+            });
+            document.getElementById('tkt-showtime').innerText = `Show: ${dateFormatted} • ${timeFormatted}`;
+        } else {
+            document.getElementById('tkt-showtime').innerText = 'Show: Time Unavailable';
+        }
+
+        // Format Booking Time
+        let bookDate = null;
+        if (Array.isArray(b.bookingTime) && b.bookingTime.length >= 3) {
+            const [y, m, d, h = 0, min = 0] = b.bookingTime;
+            bookDate = new Date(y, m - 1, d, h, min);
+        } else if (b.bookingTime) {
+            bookDate = new Date(b.bookingTime);
+        }
+
+        if (bookDate && !isNaN(bookDate.getTime())) {
+            const bookedFormatted = bookDate.toLocaleString('en-US', {
+              day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+            });
+            document.getElementById('tkt-booking-time').innerText = `Booked On: ${bookedFormatted}`;
+        } else {
+            document.getElementById('tkt-booking-time').innerText = '';
+        }
+        
+        // Cryptography Update UI
+        const hashSpan = document.getElementById('tkt-hash-status');
+        if (b.hashValid === true) {
+            hashSpan.textContent = 'VERIFIED';
+            hashSpan.style.color = 'green';
+        } else {
+            hashSpan.textContent = 'FAILED';
+            hashSpan.style.color = 'red';
+        }
+
+        const sigSpan = document.getElementById('tkt-sig-status');
+        if (b.signatureValid === true) {
+            sigSpan.textContent = 'VALID';
+            sigSpan.style.color = 'green';
+        } else {
+            sigSpan.textContent = 'INVALID';
+            sigSpan.style.color = 'red';
+        }
+
+        // Fetch trailer URL
+        try {
+          const [ns, cs] = await Promise.all([API.getNowShowing(), API.getComingSoon()]);
+          const allMovies = [...(ns.data || []), ...(cs.data || [])];
+          const match = allMovies.find(m => m.title === b.movieTitle);
+          if (match && match.trailerUrl) {
+            const trailerBtn = document.getElementById('tkt-trailer-btn');
+            trailerBtn.href = match.trailerUrl;
+            trailerBtn.style.display = 'inline-flex';
+          }
+        } catch (e) {
+          console.warn('Could not fetch trailer link for ticket');
+        }
+
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to load ticket details', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
